@@ -6,3 +6,5 @@ requests
 python-multipart
 psd_tools
 reportlab
+psd-tools[composite]
+scikit-image

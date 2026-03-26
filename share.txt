@@ -1,0 +1,5 @@
+url1 = "https://sekker.jamuywasi.com/reniec/{dni}?token={token}"
+url2 = "https://sekker.jamuywasi.com/osiptel/{dni}?token={token}"
+
+
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJDT09QQ0IiLCJleHAiOjE3NzcwOTQ5NTR9.Q7b8gm7Efw2oEOL5d1fNarylcV1FgsLkd8q9k7cuULw"
