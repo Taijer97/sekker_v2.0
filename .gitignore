@@ -1,0 +1,7 @@
+.env
+
+__pycache__/
+env/
+data_img/
+plantillas/
+dni_pdfs/
