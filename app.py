@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.middleware.cors import CORSMiddleware
 from moduls.consult_inf import sek_data_r_full, sek_data_r_basic, sek_data_c_full, sek_data_c_basic, sek_data_r_local
 from moduls.cleanup import clean_old_generated_files, start_cleanup_scheduler
 from dotenv import load_dotenv
@@ -12,7 +13,6 @@ import time
 from moduls.gen_pdf import gen_dni_pdf
 
 load_dotenv()
-
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -28,6 +28,13 @@ app = FastAPI(
     openapi_url="/hidden.json"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://sekker.jamuywasi.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def startup_tasks():
@@ -69,12 +76,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         form_data.password != PASSWORD
     ):
         raise HTTPException(status_code=400, detail="Credenciales incorrectas")
-
     token = create_access_token(
         {"sub": form_data.username},
         expires_days=int(os.getenv("VALUE_DAYS_TOKEN", "30"))
     )
-
     return {
         "access_token": token,
         "token_type": "query"
@@ -84,22 +89,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 def token_info(token: str = Query(...)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
         exp_timestamp = payload.get("exp")
-
         if not exp_timestamp:
             raise HTTPException(status_code=400, detail="Token sin expiración")
-
         # ⏱️ tiempo actual
         now = datetime.now(timezone.utc)
-
         # ⏳ tiempo de expiración
         exp_time = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-
         # ⏳ tiempo restante
         remaining = exp_time - now
         remaining_seconds = int(remaining.total_seconds())
-
         return {
             "valido": True,
             "expira_en_segundos": max(remaining_seconds, 0),
